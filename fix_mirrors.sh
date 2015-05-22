@@ -69,8 +69,8 @@ function main () {
 	pushd $tmpdir
 	fuel_download_settings "$env"
 	fuel_fix_mirrors "$env"
-	fuel_upload_settings "$env"
 	fuel_fix_ntp "$env"
+	fuel_upload_settings "$env"
 	popd
 	rm -rf $tmpdir
 
