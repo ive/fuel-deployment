@@ -26,7 +26,7 @@ EOF
 fuel_download_settings(){
 	local env="$1"
 
-	fuel settings -d  --env $env
+	fuel settings --download  --env $env
 }
 
 fuel_upload_settings(){
@@ -40,6 +40,12 @@ fuel_fix_mirrors(){
 
 	sed -i 's/archive.ubuntu.com/135.16.118.16/g' settings_${env}.yaml
 	sed -i 's@mirror.fuel-infra.org@135.16.118.16/mirantis@g' settings_${env}.yaml
+}
+
+fuel_fix_ntp(){
+	local env="$1"
+
+	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|135.89.153.82, 135.89.153.98|g' settings_${env}.yaml
 }
 
 function main () {
@@ -64,6 +70,7 @@ function main () {
 	fuel_download_settings "$env"
 	fuel_fix_mirrors "$env"
 	fuel_upload_settings "$env"
+	fuel_fix_ntp "$env"
 	popd
 	rm -rf $tmpdir
 
