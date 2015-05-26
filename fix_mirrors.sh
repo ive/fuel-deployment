@@ -45,7 +45,7 @@ fuel_fix_mirrors(){
 fuel_fix_ntp(){
 	local env="$1"
 
-	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|135.89.153.82, 135.89.153.98|g' settings_${env}.yaml
+	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|135.38.244.3, 135.38.244.16|g' settings_${env}.yaml
 }
 
 function main () {
