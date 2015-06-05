@@ -49,11 +49,9 @@ fuel_fix_ntp(){
 }
 
 fuel_allow_noncontroller_deployment(){
-	dockerctl shell nailgun grep  '#cls._check_controllers_count'  /usr/lib/python2.6/site-packages/nailgun/task/task.py
-	if [[ $? -ne 0 ]]; then
-		dockerctl shell nailgun sed -e "s/cls._check_controllers_count/#cls._check_controllers_count/g" -i /usr/lib/python2.6/site-packages/nailgun/task/task.py
-		dockerctl shell nailgun supervisorctl restart nailgun
-	fi
+	dockerctl shell nailgun grep  '#cls._check_controllers_count'  /usr/lib/python2.6/site-packages/nailgun/task/task.py || {
+	dockerctl shell nailgun sed -e "s/cls._check_controllers_count/#cls._check_controllers_count/g" -i /usr/lib/python2.6/site-packages/nailgun/task/task.py;
+	dockerctl shell nailgun supervisorctl restart nailgun;}
 }
 
 function main () {
@@ -75,7 +73,7 @@ function main () {
     if [[ -z "${env}" ]]; then  error "Choose environment for deployment";fi
 	tmpdir=$(mktemp -d /tmp/XXX)
 	pushd $tmpdir
-	fuel_allow_noncontroller_deployment()
+	fuel_allow_noncontroller_deployment
 	fuel_download_settings "$env"
 	fuel_fix_mirrors "$env"
 	fuel_fix_ntp "$env"
