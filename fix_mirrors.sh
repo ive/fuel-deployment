@@ -26,7 +26,7 @@ EOF
 fuel_download_settings(){
 	local env="$1"
 
-	fuel settings -d  --env $env
+	fuel settings --download  --env $env
 }
 
 fuel_upload_settings(){
@@ -40,6 +40,18 @@ fuel_fix_mirrors(){
 
 	sed -i 's/archive.ubuntu.com/135.16.118.16/g' settings_${env}.yaml
 	sed -i 's@mirror.fuel-infra.org@135.16.118.16/mirantis@g' settings_${env}.yaml
+}
+
+fuel_fix_ntp(){
+	local env="$1"
+
+	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|135.38.244.3, 135.38.244.16|g' settings_${env}.yaml
+}
+
+fuel_allow_noncontroller_deployment(){
+	dockerctl shell nailgun grep  '#cls._check_controllers_count'  /usr/lib/python2.6/site-packages/nailgun/task/task.py || {
+	dockerctl shell nailgun sed -e "s/cls._check_controllers_count/#cls._check_controllers_count/g" -i /usr/lib/python2.6/site-packages/nailgun/task/task.py;
+	dockerctl shell nailgun supervisorctl restart nailgun;}
 }
 
 function main () {
@@ -61,8 +73,10 @@ function main () {
     if [[ -z "${env}" ]]; then  error "Choose environment for deployment";fi
 	tmpdir=$(mktemp -d /tmp/XXX)
 	pushd $tmpdir
+	fuel_allow_noncontroller_deployment
 	fuel_download_settings "$env"
 	fuel_fix_mirrors "$env"
+	fuel_fix_ntp "$env"
 	fuel_upload_settings "$env"
 	popd
 	rm -rf $tmpdir
