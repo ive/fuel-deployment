@@ -51,7 +51,18 @@ fuel_fix_ntp(){
 fuel_allow_noncontroller_deployment(){
 	dockerctl shell nailgun grep  '#cls._check_controllers_count'  /usr/lib/python2.6/site-packages/nailgun/task/task.py || {
 	dockerctl shell nailgun sed -e "s/cls._check_controllers_count/#cls._check_controllers_count/g" -i /usr/lib/python2.6/site-packages/nailgun/task/task.py;
-	dockerctl shell nailgun supervisorctl restart nailgun;}
+	}
+}
+
+fuel_allow_nonmongo_deployment(){
+        dockerctl shell nailgun grep  '#cls._check_mongo_nodes(task)'  /usr/lib/python2.6/site-packages/nailgun/task/task.py || {
+        dockerctl shell nailgun sed -e "s/if objects.Release.is_external_mongo_enabled/#if objects.Release.is_external_mongo_enabled/g" -i /usr/lib/python2.6/site-packages/nailgun/task/task.py;
+        dockerctl shell nailgun sed -e "s/cls._check_mongo_nodes/#cls._check_mongo_nodes/g" -i /usr/lib/python2.6/site-packages/nailgun/task/task.py;
+        }
+}
+
+restart_nailgun(){
+        dockerctl shell nailgun supervisorctl restart nailgun;
 }
 
 function main () {
@@ -74,6 +85,8 @@ function main () {
 	tmpdir=$(mktemp -d /tmp/XXX)
 	pushd $tmpdir
 	fuel_allow_noncontroller_deployment
+        fuel_allow_nonmongo_deployment
+        restart_nailgun
 	fuel_download_settings "$env"
 	fuel_fix_mirrors "$env"
 	fuel_fix_ntp "$env"
