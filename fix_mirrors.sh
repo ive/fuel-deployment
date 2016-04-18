@@ -38,14 +38,14 @@ fuel_upload_settings(){
 fuel_fix_mirrors(){
 	local env="$1"
 
-	sed -i 's/archive.ubuntu.com/135.16.118.16/g' settings_${env}.yaml
-	sed -i 's@mirror.fuel-infra.org@135.16.118.16/mirantis@g' settings_${env}.yaml
+	sed -i 's/archive.ubuntu.com/mirrors.kha.mirantis.net/g' settings_${env}.yaml
+	sed -i 's@mirror.fuel-infra.org@1.1.1.1/mirantis@g' settings_${env}.yaml
 }
 
 fuel_fix_ntp(){
 	local env="$1"
 
-	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|135.38.244.3, 135.38.244.16|g' settings_${env}.yaml
+	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|172.18.208.44, 172.18.208.44|g' settings_${env}.yaml
 }
 
 fuel_enable_public_int(){
@@ -133,7 +133,7 @@ function main () {
 	fuel_fix_mirrors "$env"
 	fuel_fix_ntp "$env"
 	fuel_enable_public_int "$env"
-	fuel_add_mirror "$env" "percona" "1200" "main" "deb" "trusty" "http://135.16.118.16/percona/"
+	fuel_add_mirror "$env" "percona" "1200" "main" "deb" "trusty" "http://percona.local/percona/"
 	fuel_upload_settings "$env"
 	popd
 	rm -rf $tmpdir
