@@ -35,6 +35,18 @@ fuel_upload_settings(){
 	fuel settings --upload --env $env
 }
 
+fuel_download_network(){
+	local env="$1"
+
+	fuel network --download  --env $env
+}
+
+fuel_upload_network(){
+	local env="$1"
+
+	fuel network --upload  --env $env
+}
+
 fuel_fix_mirrors(){
 	local env="$1"
 
@@ -46,6 +58,15 @@ fuel_fix_ntp(){
 	local env="$1"
 
 	sed -i 's|0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org|172.18.208.44, 172.18.208.44|g' settings_${env}.yaml
+}
+
+fuel_fix_network(){
+	local env="$1"
+
+	sed -i 's@172.16.0@10.1.1@g' network_${env}.yaml
+	sed -i 's@192.168.0@10.1.2@g' network_${env}.yaml
+	sed -i 's@192.168.1\.@10.1.4.@g' network_${env}.yaml
+	sed -i 's@192.168.2@10.1.3@g' network_${env}.yaml
 }
 
 fuel_enable_public_int(){
@@ -128,13 +149,16 @@ function main () {
 	tmpdir=$(mktemp -d /tmp/XXX)
 	pushd $tmpdir
 	fuel_allow_noncontroller_deployment
-        fuel_allow_nonmongo_deployment
+    fuel_allow_nonmongo_deployment
 	fuel_download_settings "$env"
+	fuel_download_network "$env"
 	fuel_fix_mirrors "$env"
 	fuel_fix_ntp "$env"
 	fuel_enable_public_int "$env"
 	fuel_add_mirror "$env" "percona" "1200" "main" "deb" "trusty" "http://percona.local/percona/"
+    fuel_fix_network "$env"
 	fuel_upload_settings "$env"
+    fuel_upload_network "$env"
 	popd
 	rm -rf $tmpdir
 
